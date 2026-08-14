@@ -51,6 +51,12 @@ export const ChartHeader: React.FC<ChartHeaderProps> = ({
           <RefreshCcw className="w-4 h-4" />
         </button>
 
+        {/* SENKO Enso Mark */}
+        <div className="flex items-center gap-2 pr-2 border-r border-slate-800">
+          <img src="/senko_enso_mark.jpg" alt="SENKO" className="w-6 h-6 rounded-md object-cover border border-amber-500/30" />
+          <span className="font-serif font-bold text-xs tracking-widest text-amber-300 hidden md:inline">SENKO</span>
+        </div>
+
         <div className="flex items-center gap-2">
           <span className="font-bold text-base sm:text-lg tracking-wider text-white">
             {setup.symbol}

@@ -35,8 +35,8 @@ export const DevMenu: React.FC<DevMenuProps> = ({
               <Zap className="w-4 h-4" />
             </div>
             <div>
-              <h3 className="font-bold text-sm">Edge Simulation Lab</h3>
-              <p className="text-[11px] text-slate-400">Test Edge System Signal B Pulses</p>
+              <h3 className="font-serif font-bold text-sm text-amber-300">SENKO Dev Lab</h3>
+              <p className="text-[11px] text-slate-400">Test Edge System & Audio Feedback</p>
             </div>
           </div>
           <button

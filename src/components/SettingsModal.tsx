@@ -28,7 +28,7 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
               <SlidersHorizontal className="w-4 h-4" />
             </div>
             <div>
-              <h3 className="font-bold text-sm">Cockpit Settings</h3>
+              <h3 className="font-serif font-bold text-sm text-amber-300">SENKO Cockpit Settings</h3>
               <p className="text-[11px] text-slate-400">Display, Audio Sirens & Edge Glow</p>
             </div>
           </div>

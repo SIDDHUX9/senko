@@ -153,8 +153,8 @@ export function App() {
       <main className="flex-1 w-full h-full relative" onClick={handleCornerTap}>
         {loading ? (
           <div className="w-full h-full flex flex-col items-center justify-center bg-[#090d16]">
-            <div className="w-10 h-10 border-4 border-emerald-500/20 border-t-emerald-500 rounded-full animate-spin mb-3" />
-            <p className="text-xs font-mono text-slate-400">Loading {setup.symbol} Intraday Feed...</p>
+            <div className="w-10 h-10 border-4 border-amber-500/20 border-t-amber-500 rounded-full animate-spin mb-3" />
+            <p className="text-xs font-mono text-slate-400">Loading {setup.symbol} SENKO Feed...</p>
           </div>
         ) : (
           <TradingView
