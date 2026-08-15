@@ -209,7 +209,7 @@ export const TradingView: React.FC<TradingViewProps> = ({
       resizeObserver.disconnect();
       chart.remove();
     };
-  }, [buyPrice, targetPrice, stopLoss, overlayConfig.chartType]);
+  }, [buyPrice, targetPrice, stopLoss, overlayConfig.chartType, overlayConfig.showVWAP, overlayConfig.showEMA, overlayConfig.emaPeriod]);
 
   // Update Series Data
   useEffect(() => {

@@ -20,7 +20,7 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/70 backdrop-blur-sm animate-in fade-in duration-200">
-      <div className="w-full max-w-sm glass-panel-glow rounded-3xl p-5 border border-slate-800 text-white shadow-2xl relative space-y-4 max-h-[90vh] overflow-y-auto custom-scrollbar">
+      <div className="w-full max-w-sm glass-panel-glow rounded-3xl p-5 border border-slate-800 text-white shadow-2xl relative space-y-4 max-h-[85dvh] overflow-y-auto custom-scrollbar">
         {/* Header */}
         <div className="flex items-center justify-between pb-3 border-b border-slate-800">
           <div className="flex items-center gap-2">

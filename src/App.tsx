@@ -127,7 +127,7 @@ export function App() {
   }
 
   return (
-    <div className="relative w-screen h-screen overflow-hidden bg-[#090d16] text-slate-100 flex flex-col select-none">
+    <div className="relative w-full h-dvh min-h-dvh overflow-hidden bg-[#090d16] text-slate-100 flex flex-col select-none">
       {/* Ambient Edge Glow Overlay with Customizable Glow Level */}
       <EdgeGlow edgeState={edgeState} glowLevel={overlayConfig.glowLevel} />
 
