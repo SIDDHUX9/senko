@@ -25,7 +25,12 @@ import {
   CheckCircle2,
   Radio,
   Zap,
-  ArrowUpRight
+  ArrowUpRight,
+  Code2,
+  ShieldCheck,
+  FileText,
+  X,
+  ExternalLink
 } from 'lucide-react';
 
 interface SetupFormProps {
@@ -47,6 +52,9 @@ export const SetupForm: React.FC<SetupFormProps> = ({ onStartTrading, onOpenSett
   const [isFetchingPrice, setIsFetchingPrice] = useState<boolean>(false);
   const [isPresetDropdownOpen, setIsPresetDropdownOpen] = useState<boolean>(false);
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
+  
+  // Modal State (About Dev, Privacy Policy, Terms & Conditions)
+  const [activeModal, setActiveModal] = useState<'about' | 'privacy' | 'terms' | null>(null);
   
   // Real-time live snapshot state
   const [snapshot, setSnapshot] = useState<StockSnapshot | null>(null);
@@ -260,16 +268,19 @@ export const SetupForm: React.FC<SetupFormProps> = ({ onStartTrading, onOpenSett
               { id: 'analytics', label: 'Analytics', icon: BarChart3, isSoon: true },
               { id: 'backtest', label: 'Backtest', icon: TrendingUp, isSoon: true },
               { id: 'journal', label: 'Journal', icon: BookOpen, isSoon: true },
+              { id: 'about', label: 'About Dev', icon: Code2, isSoon: false },
               { id: 'settings', label: 'Settings', icon: Settings, isSoon: false },
             ].map((item) => {
               const Icon = item.icon;
-              const isActive = activeNav === item.id;
+              const isActive = activeNav === item.id || (item.id === 'about' && activeModal === 'about');
               return (
                 <button
                   key={item.id}
                   type="button"
                   onClick={() => {
-                    if (item.id === 'settings') {
+                    if (item.id === 'about') {
+                      setActiveModal('about');
+                    } else if (item.id === 'settings') {
                       if (onOpenSettings) onOpenSettings();
                       else showToast('Cockpit Settings available inside terminal view.');
                     } else {
@@ -331,6 +342,13 @@ export const SetupForm: React.FC<SetupFormProps> = ({ onStartTrading, onOpenSett
                   <a href="https://github.com/SIDDHUX9" target="_blank" rel="noopener noreferrer" className="hover:text-white transition-colors">GitHub</a>
                   <span>•</span>
                   <a href="https://www.linkedin.com/in/siddhu-singh/" target="_blank" rel="noopener noreferrer" className="hover:text-white transition-colors">LinkedIn</a>
+                </div>
+                <div className="flex items-center justify-center gap-2 text-[9px] text-zinc-500 pt-0.5">
+                  <button type="button" onClick={() => setActiveModal('about')} className="hover:text-[#F5CB4C] transition-colors cursor-pointer">About Dev</button>
+                  <span>•</span>
+                  <button type="button" onClick={() => setActiveModal('privacy')} className="hover:text-white transition-colors cursor-pointer">Privacy</button>
+                  <span>•</span>
+                  <button type="button" onClick={() => setActiveModal('terms')} className="hover:text-white transition-colors cursor-pointer">Terms</button>
                 </div>
               </div>
             </div>
@@ -1171,6 +1189,227 @@ export const SetupForm: React.FC<SetupFormProps> = ({ onStartTrading, onOpenSett
           );
         })}
       </nav>
+
+      {/* About Dev, Privacy Policy & Terms Modal Overlay */}
+      {activeModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-md animate-fadeIn">
+          <div className="relative w-full max-w-2xl bg-[#0b0c10]/95 border border-[#1f212d] rounded-2xl p-6 shadow-2xl space-y-5 max-h-[90vh] overflow-y-auto custom-scrollbar">
+            
+            {/* Modal Header */}
+            <div className="flex items-center justify-between border-b border-[#1f212d] pb-4">
+              <div className="flex items-center gap-2.5">
+                {activeModal === 'about' && <Code2 className="w-5 h-5 text-[#F5CB4C]" />}
+                {activeModal === 'privacy' && <ShieldCheck className="w-5 h-5 text-[#22C55E]" />}
+                {activeModal === 'terms' && <FileText className="w-5 h-5 text-[#F5CB4C]" />}
+                <h3 className="font-serif text-lg font-bold text-white">
+                  {activeModal === 'about' && 'About the Developer & SENKO'}
+                  {activeModal === 'privacy' && 'Privacy Policy — 100% Client-Side'}
+                  {activeModal === 'terms' && 'Terms & Conditions — Disclaimer'}
+                </h3>
+              </div>
+
+              <button
+                type="button"
+                onClick={() => setActiveModal(null)}
+                className="p-1.5 rounded-lg bg-[#141620] border border-[#242735] text-zinc-400 hover:text-white transition-colors cursor-pointer"
+              >
+                <X className="w-4 h-4" />
+              </button>
+            </div>
+
+            {/* Modal Tab Switcher */}
+            <div className="flex items-center gap-1.5 p-1 rounded-xl bg-[#0d0e13] border border-[#1f212d] font-mono text-xs">
+              <button
+                type="button"
+                onClick={() => setActiveModal('about')}
+                className={`flex-1 py-2 px-3 rounded-lg transition-all cursor-pointer ${
+                  activeModal === 'about'
+                    ? 'bg-[#18160e] text-[#F5CB4C] font-bold border border-[#F5CB4C]/40'
+                    : 'text-zinc-400 hover:text-white'
+                }`}
+              >
+                About Dev
+              </button>
+              <button
+                type="button"
+                onClick={() => setActiveModal('privacy')}
+                className={`flex-1 py-2 px-3 rounded-lg transition-all cursor-pointer ${
+                  activeModal === 'privacy'
+                    ? 'bg-[#0f1813] text-[#22C55E] font-bold border border-[#22C55E]/40'
+                    : 'text-zinc-400 hover:text-white'
+                }`}
+              >
+                Privacy Policy
+              </button>
+              <button
+                type="button"
+                onClick={() => setActiveModal('terms')}
+                className={`flex-1 py-2 px-3 rounded-lg transition-all cursor-pointer ${
+                  activeModal === 'terms'
+                    ? 'bg-[#1c180e] text-[#F5CB4C] font-bold border border-[#F5CB4C]/40'
+                    : 'text-zinc-400 hover:text-white'
+                }`}
+              >
+                Terms & Conditions
+              </button>
+            </div>
+
+            {/* Modal Body */}
+            <div className="py-2 font-mono text-xs text-zinc-300">
+              {activeModal === 'about' && (
+                <div className="space-y-4">
+                  <div className="flex items-center gap-4 p-4 rounded-2xl bg-[#141620] border border-[#262835]">
+                    <div className="w-12 h-12 rounded-xl bg-[#F5CB4C]/10 border border-[#F5CB4C]/40 flex items-center justify-center font-mono text-base font-bold text-[#F5CB4C] shrink-0">
+                      SS
+                    </div>
+                    <div>
+                      <h4 className="font-mono text-sm font-bold text-white">Siddhu Singh</h4>
+                      <p className="font-mono text-[10px] text-[#F5CB4C] pt-0.5">
+                        Engineering Student · Founder @ Phantom Codes · Builder · Web3 Enthusiast · Professional 3 AM Debugger
+                      </p>
+                    </div>
+                  </div>
+
+                  <div className="space-y-3 font-mono text-xs text-zinc-300 leading-relaxed bg-[#0d0e13]/90 border border-[#1b1c24] p-5 rounded-2xl">
+                    <p>
+                      Hey! 👋 I'm Siddhu Singh, an engineering student, builder, and founder of Phantom Codes. I spend most of my time turning random ideas into things that actually work from Web3 and full-stack applications to the occasional project that starts with “what if I just tried this?”
+                    </p>
+
+                    <p>
+                      SENKO was one of those ideas. While juggling my end-semester exams, I started casually observing the NSE and NASDAQ and experimenting with intraday trading. I kept finding myself checking the chart every few minutes, so I decided to put my spare phone to work. That little experiment became SENKO — a project built around a simple idea: <span className="text-[#F5CB4C] font-semibold">What if you could feel what your trade is doing without constantly watching it?</span>
+                    </p>
+
+                    <p className="text-zinc-200 font-medium pt-1">
+                      I build because it's more fun than just talking about ideas.
+                    </p>
+                  </div>
+
+                  {/* Social Links Row */}
+                  <div className="flex flex-wrap items-center justify-between gap-3 pt-1">
+                    <div className="flex flex-wrap items-center gap-2">
+                      <a
+                        href="https://github.com/SIDDHUX9"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="inline-flex items-center gap-2 px-3.5 py-2 rounded-xl bg-[#141620] border border-[#262835] hover:border-[#F5CB4C]/60 text-xs font-mono text-white hover:text-[#F5CB4C] transition-colors"
+                      >
+                        <svg className="w-4 h-4 text-[#F5CB4C] fill-current" viewBox="0 0 24 24">
+                          <path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0024 12c0-6.63-5.37-12-12-12z"/>
+                        </svg>
+                        <span>github.com/SIDDHUX9</span>
+                        <ExternalLink className="w-3 h-3 text-zinc-500" />
+                      </a>
+
+                      <a
+                        href="https://www.linkedin.com/in/siddhu-singh/"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="inline-flex items-center gap-2 px-3.5 py-2 rounded-xl bg-[#141620] border border-[#262835] hover:border-[#F5CB4C]/60 text-xs font-mono text-white hover:text-[#F5CB4C] transition-colors"
+                      >
+                        <svg className="w-4 h-4 text-[#0A66C2] fill-current" viewBox="0 0 24 24">
+                          <path d="M19 3a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h14m-.5 15.5v-5.3a3.26 3.26 0 0 0-3.26-3.26c-.85 0-1.84.52-2.28 1.3v-1.11h-2.79v8.37h2.79v-4.93c0-.77.62-1.4 1.39-1.4a1.4 1.4 0 0 1 1.4 1.4v4.93h2.75M6.88 8.56a1.68 1.68 0 0 0 1.68-1.68c0-.93-.75-1.69-1.68-1.69a1.69 1.69 0 0 0-1.69 1.69c0 .93.76 1.68 1.69 1.68m1.39 9.94v-8.37H5.5v8.37h2.77z"/>
+                        </svg>
+                        <span>linkedin.com/in/siddhu-singh</span>
+                        <ExternalLink className="w-3 h-3 text-zinc-500" />
+                      </a>
+                    </div>
+
+                    <a
+                      href="https://www.phantomcodes.com/"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="font-mono text-xs text-[#F5CB4C] hover:underline font-bold"
+                    >
+                      phantomcodes.com ↗
+                    </a>
+                  </div>
+                </div>
+              )}
+
+              {activeModal === 'privacy' && (
+                <div className="space-y-4">
+                  <div className="p-3.5 rounded-xl bg-[#0f1813] border border-[#1a3824] flex items-center gap-3">
+                    <ShieldCheck className="w-5 h-5 text-[#22C55E] shrink-0" />
+                    <p className="text-[11px] text-[#22C55E]">
+                      100% Client-Side Privacy: Your trade setups and financial capital numbers are processed locally in browser memory.
+                    </p>
+                  </div>
+
+                  <div className="space-y-3">
+                    <div>
+                      <h5 className="font-bold text-white text-[11px] mb-1">1. Data Collection & Zero-Logging Policy</h5>
+                      <p className="text-zinc-400 text-[11px]">
+                        Senko does not log, transmit, or sell your trade boundaries, capital metrics, or stock setups to any server or external tracking company. All calculations execute locally.
+                      </p>
+                    </div>
+
+                    <div>
+                      <h5 className="font-bold text-white text-[11px] mb-1">2. Local Preference Persistence</h5>
+                      <p className="text-zinc-400 text-[11px]">
+                        Your browser local storage is utilized strictly to save non-sensitive UI settings such as audio mute toggles, indicator visibility, and strategy preferences.
+                      </p>
+                    </div>
+
+                    <div>
+                      <h5 className="font-bold text-white text-[11px] mb-1">3. Market Data Telemetry</h5>
+                      <p className="text-zinc-400 text-[11px]">
+                        Live price data requests are anonymous read-only HTTP/WebSocket connections. No user identification or position details are transmitted.
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {activeModal === 'terms' && (
+                <div className="space-y-4">
+                  <div className="p-3.5 rounded-xl bg-[#1c180e] border border-[#3d3216] flex items-center gap-3">
+                    <Info className="w-5 h-5 text-[#F5CB4C] shrink-0" />
+                    <p className="text-[11px] text-[#F5CB4C]">
+                      Financial Disclaimer: Senko Terminal is a visual execution workspace and calculation tool. It does not provide financial advice.
+                    </p>
+                  </div>
+
+                  <div className="space-y-3">
+                    <div>
+                      <h5 className="font-bold text-white text-[11px] mb-1">1. Financial Trading Risk</h5>
+                      <p className="text-zinc-400 text-[11px]">
+                        Intraday equity and derivatives trading involves significant financial risk. Users are 100% responsible for verifying trade orders on their broker terminal before execution.
+                      </p>
+                    </div>
+
+                    <div>
+                      <h5 className="font-bold text-white text-[11px] mb-1">2. Platform Latency & Service Availability</h5>
+                      <p className="text-zinc-400 text-[11px]">
+                        While Senko utilizes zero-latency local audio engines, real-time market data streams depend on external internet connection quality. Senko bears no liability for trading losses.
+                      </p>
+                    </div>
+
+                    <div>
+                      <h5 className="font-bold text-white text-[11px] mb-1">3. Intellectual Property Rights</h5>
+                      <p className="text-zinc-400 text-[11px]">
+                        The Senko trademark, Enso branding, visual design system, and acoustic synthesis algorithms are protected intellectual property of Phantom Codes.
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              )}
+
+            </div>
+
+            {/* Modal Footer */}
+            <div className="pt-4 border-t border-[#1f212d] flex justify-end">
+              <button
+                type="button"
+                onClick={() => setActiveModal(null)}
+                className="px-5 py-2 rounded-xl bg-[#F5CB4C] hover:bg-[#FFE066] text-[#08090c] font-mono text-xs font-bold transition-colors cursor-pointer"
+              >
+                Close
+              </button>
+            </div>
+
+          </div>
+        </div>
+      )}
 
     </div>
   );
