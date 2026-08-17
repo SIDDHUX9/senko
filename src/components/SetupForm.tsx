@@ -424,58 +424,79 @@ export const SetupForm: React.FC<SetupFormProps> = ({ onStartTrading, onOpenSett
                     
                     {/* Section 1: MARKET & SYMBOL */}
                     <div className="space-y-2">
-                      <label className="font-mono text-[10px] font-bold text-zinc-400 uppercase tracking-widest block">
-                        1. MARKET & SYMBOL
-                      </label>
-                      
+                      <div className="flex items-center justify-between">
+                        <label htmlFor="symbolInput" className="font-mono text-[10px] font-bold text-zinc-400 uppercase tracking-widest block">
+                          1. MARKET & SYMBOL
+                        </label>
+                        {activePresetInfo && (
+                          <span className="font-sans text-[10px] text-[#F5CB4C] font-semibold hidden xs:inline">
+                            {activePresetInfo.name} ({activePresetInfo.sector})
+                          </span>
+                        )}
+                      </div>
+
                       <div className="relative">
-                        <button
-                          type="button"
-                          onClick={() => setIsPresetDropdownOpen(!isPresetDropdownOpen)}
-                          className="w-full flex items-center justify-between bg-[#0d0e12]/90 border border-[#22242c] hover:border-[#F5CB4C]/50 rounded-xl px-4 py-3.5 transition-colors cursor-pointer"
-                        >
-                          <div className="flex items-center gap-3">
-                            <div className="w-7 h-7 rounded-full bg-[#161822] border border-[#2c2f3d] flex items-center justify-center font-mono text-xs font-bold text-[#F5CB4C]">
-                              {symbol.charAt(0)}
-                            </div>
-                            <div className="text-left">
-                              <span className="font-mono text-base font-bold text-white uppercase tracking-wider block">
-                                {symbol}
-                              </span>
-                              {activePresetInfo && (
-                                <span className="font-sans text-[10px] text-zinc-400 block -mt-0.5">
-                                  {activePresetInfo.name}
-                                </span>
-                              )}
-                            </div>
+                        <div className="w-full flex items-center bg-[#0d0e12]/90 border border-[#22242c] focus-within:border-[#F5CB4C]/60 rounded-xl px-4 py-3 transition-colors">
+                          <div className="w-7 h-7 rounded-full bg-[#161822] border border-[#2c2f3d] flex items-center justify-center font-mono text-xs font-bold text-[#F5CB4C] shrink-0 mr-3">
+                            {symbol ? symbol.charAt(0).toUpperCase() : 'S'}
                           </div>
 
-                          <div className="flex items-center gap-3">
-                            <span className="font-mono text-xs text-zinc-500">
+                          <div className="flex-1">
+                            <input
+                              id="symbolInput"
+                              type="text"
+                              value={symbol}
+                              onChange={(e) => {
+                                const val = e.target.value.toUpperCase();
+                                setSymbol(val);
+                                setErrorMsg(null);
+                              }}
+                              placeholder="ENTER SYMBOL (E.G. RELIANCE, TATAMOTORS)"
+                              className="w-full bg-transparent font-mono text-base font-bold text-white uppercase tracking-wider outline-none placeholder:text-zinc-600 placeholder:normal-case placeholder:font-sans placeholder:text-xs"
+                            />
+                          </div>
+
+                          <div className="flex items-center gap-3 shrink-0 ml-2">
+                            <span className="font-mono text-xs text-zinc-500 hidden xs:inline">
                               {formatIndianTicker(symbol)}
                             </span>
-                            <ChevronDown className={`w-4 h-4 text-zinc-400 transition-transform ${isPresetDropdownOpen ? 'rotate-180' : ''}`} />
+
+                            <button
+                              type="button"
+                              onClick={() => setIsPresetDropdownOpen(!isPresetDropdownOpen)}
+                              className="p-1.5 rounded-lg hover:bg-[#181a24] text-zinc-400 hover:text-white transition-colors cursor-pointer"
+                              title="Select Popular Stock Preset"
+                            >
+                              <ChevronDown className={`w-4 h-4 transition-transform ${isPresetDropdownOpen ? 'rotate-180' : ''}`} />
+                            </button>
                           </div>
-                        </button>
+                        </div>
 
                         {/* Dropdown Stock Selectors */}
                         {isPresetDropdownOpen && (
                           <div className="absolute top-full left-0 right-0 mt-2 rounded-xl bg-[#0e0f14] border border-[#262835] shadow-2xl p-2 z-50 grid grid-cols-2 sm:grid-cols-3 gap-1.5 max-h-72 overflow-y-auto custom-scrollbar">
-                            {POPULAR_INDIAN_STOCKS.map((preset) => (
-                              <button
-                                key={preset.symbol}
-                                type="button"
-                                onClick={() => handleSelectPreset(preset)}
-                                className={`flex items-center justify-between p-2.5 rounded-lg font-mono text-xs transition-all cursor-pointer ${
-                                  symbol.toUpperCase() === preset.symbol
-                                    ? 'bg-[#18160e] border border-[#F5CB4C]/40 text-[#F5CB4C] font-bold'
-                                    : 'hover:bg-[#151720] text-zinc-300'
-                                }`}
-                              >
-                                <span className="truncate">{preset.symbol}</span>
-                                <span className="text-[10px] text-zinc-500 shrink-0">₹{preset.approxPrice}</span>
-                              </button>
-                            ))}
+                            {POPULAR_INDIAN_STOCKS
+                              .filter((p) => !symbol || p.symbol.includes(symbol) || p.name.toUpperCase().includes(symbol))
+                              .concat(
+                                POPULAR_INDIAN_STOCKS.filter(
+                                  (p) => symbol && !p.symbol.includes(symbol) && !p.name.toUpperCase().includes(symbol)
+                                )
+                              )
+                              .map((preset) => (
+                                <button
+                                  key={preset.symbol}
+                                  type="button"
+                                  onClick={() => handleSelectPreset(preset)}
+                                  className={`flex items-center justify-between p-2.5 rounded-lg font-mono text-xs transition-all cursor-pointer ${
+                                    symbol.toUpperCase() === preset.symbol
+                                      ? 'bg-[#18160e] border border-[#F5CB4C]/40 text-[#F5CB4C] font-bold'
+                                      : 'hover:bg-[#151720] text-zinc-300'
+                                  }`}
+                                >
+                                  <span className="truncate">{preset.symbol}</span>
+                                  <span className="text-[10px] text-zinc-500 shrink-0">₹{preset.approxPrice}</span>
+                                </button>
+                              ))}
                           </div>
                         )}
                       </div>
