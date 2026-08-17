@@ -38,3 +38,12 @@ export function formatIndianTicker(rawSymbol: string): string {
 export function cleanDisplaySymbol(ticker: string): string {
   return ticker.replace(/\.(NS|BO)$/i, '').toUpperCase();
 }
+
+/**
+ * Finds preset information for a given symbol or ticker
+ */
+export function findStockPreset(symbolInput: string): IndianStockPreset | undefined {
+  const clean = cleanDisplaySymbol(symbolInput);
+  return POPULAR_INDIAN_STOCKS.find((s) => s.symbol.toUpperCase() === clean);
+}
+

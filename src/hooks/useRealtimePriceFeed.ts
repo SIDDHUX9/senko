@@ -131,10 +131,11 @@ export function useRealtimePriceFeed(setup: TradeSetup): UsePriceFeedResult {
           return;
         }
       } catch {
-        // Fallback micro random walk
+        // network issue or throttled
       }
 
-      // Micro random walk tick fallback during off-market hours
+      setIsLiveFeed(false);
+      // Micro random walk tick fallback during off-market hours or when network is throttled
       const cur = priceRef.current;
       const noise = (Math.random() - 0.495) * (cur * 0.0015);
       const nextPrice = Math.max(1, cur + noise);

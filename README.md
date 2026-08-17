@@ -195,13 +195,21 @@ intraday/
 
 ---
 
-## 🛡️ License
+---
 
-Distributed under the MIT License. See `LICENSE` for details.
+## 🌐 Brand & Credits
+
+Part of [**PhantomCodes**](https://www.phantomcodes.com/)
+
+Developed with precision by **Siddhu Singh** ([@SIDDHUX9](https://github.com/SIDDHUX9)):
+* 🔗 **Website**: [PhantomCodes](https://www.phantomcodes.com/)
+* 🐙 **GitHub**: [github.com/SIDDHUX9](https://github.com/SIDDHUX9)
+* 💼 **LinkedIn**: [linkedin.com/in/siddhu-singh](https://www.linkedin.com/in/siddhu-singh/)
 
 ---
 
 <p align="center">
-  Designed for speed and focus by <b>SIDDHUX9</b>
+  Built for speed, focus & tranquil intraday trading precision by <b><a href="https://www.phantomcodes.com/">PhantomCodes</a></b>
 </p>
+
 

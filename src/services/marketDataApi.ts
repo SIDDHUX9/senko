@@ -147,6 +147,8 @@ export async function fetchRealMarketData(
   const chartEndpoints = [
     `/api/yahoo${path}`,
     `https://query1.finance.yahoo.com${path}`,
+    `https://query2.finance.yahoo.com${path}`,
+    `https://corsproxy.io/?${encodeURIComponent(`https://query1.finance.yahoo.com${path}`)}`,
     `https://api.allorigins.win/raw?url=${encodeURIComponent(`https://query1.finance.yahoo.com${path}`)}`,
   ];
 
@@ -240,3 +242,49 @@ export async function fetchRealMarketData(
     isLive: tvQuote !== null,
   };
 }
+
+export interface StockSnapshot {
+  symbol: string;
+  ticker: string;
+  price: number;
+  change: number;
+  changePct: number;
+  isLive: boolean;
+  candles: CandlestickBar[];
+}
+
+/**
+ * Fetches a quick real-time snapshot for a stock symbol, suitable for snapshot cards & preset lists.
+ */
+export async function fetchStockSnapshot(symbolInput: string): Promise<StockSnapshot> {
+  const clean = cleanDisplaySymbol(symbolInput);
+  try {
+    const res = await fetchRealMarketData(clean, '5m', 1000);
+    const price = res.currentPrice;
+    const prev = res.previousClose;
+    const change = price - prev;
+    const changePct = prev > 0 ? (change / prev) * 100 : 0;
+    return {
+      symbol: clean,
+      ticker: res.ticker,
+      price,
+      change: Number(change.toFixed(2)),
+      changePct: Number(changePct.toFixed(2)),
+      isLive: res.isLive,
+      candles: res.candles,
+    };
+  } catch {
+    const fallbackCandles = generateSyntheticIntraday(1000, '5m', 30);
+    const lastBar = fallbackCandles[fallbackCandles.length - 1];
+    return {
+      symbol: clean,
+      ticker: formatIndianTicker(clean),
+      price: lastBar.close,
+      change: 0,
+      changePct: 0,
+      isLive: false,
+      candles: fallbackCandles,
+    };
+  }
+}
+
