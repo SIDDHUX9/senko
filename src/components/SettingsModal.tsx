@@ -1,7 +1,7 @@
 import React from 'react';
 import type { ChartOverlayConfig, GlowLevel } from '../types';
 import { audioEngine } from '../utils/audioEngine';
-import { SlidersHorizontal, X, Eye, EyeOff, CandlestickChart, LineChart, Sparkles, Volume2, VolumeX, AlertTriangle, Target, TrendingDown, TrendingUp } from 'lucide-react';
+import { SlidersHorizontal, X, Eye, EyeOff, CandlestickChart, LineChart, Sparkles, Volume2, VolumeX, AlertTriangle, Target, Mic, Smartphone, ShieldCheck } from 'lucide-react';
 
 interface SettingsModalProps {
   isOpen: boolean;
@@ -72,19 +72,21 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
           </div>
         </div>
 
-        {/* Section 2: Audio Alerts & Sirens */}
+        {/* Section 2: Audio, Voice & Sensory Alerts */}
         <div className="space-y-2">
+          {/* Master Audio Toggle */}
           <div className="flex items-center justify-between p-3 rounded-2xl bg-slate-950/60 border border-slate-800">
             <div className="flex items-center gap-2.5">
               <div className="p-1.5 rounded-lg bg-emerald-500/20 text-emerald-400">
                 {config.audioEnabled ? <Volume2 className="w-4 h-4" /> : <VolumeX className="w-4 h-4" />}
               </div>
               <div>
-                <span className="font-semibold text-xs text-white block">Audio Alerts & Sirens</span>
-                <span className="text-[10px] text-slate-400">Level Sirens & Warning Beeps</span>
+                <span className="font-semibold text-xs text-white block">Hardware Audio Sirens</span>
+                <span className="text-[10px] text-slate-400">Synthesized Sirens & Warning Pips</span>
               </div>
             </div>
             <button
+              type="button"
               onClick={() => onChangeConfig({ ...config, audioEnabled: !config.audioEnabled })}
               className={`p-2 rounded-xl text-xs font-bold transition-all cursor-pointer ${
                 config.audioEnabled
@@ -96,47 +98,97 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
             </button>
           </div>
 
-          {/* Sound Preview Test Buttons */}
-          {config.audioEnabled && (
-            <div className="pt-1">
-              <label className="text-[10px] font-semibold text-slate-400 uppercase tracking-wider block mb-1.5">
-                Sound Test Previews
-              </label>
-              <div className="grid grid-cols-2 gap-1.5">
-                <button
-                  onClick={() => audioEngine.playStopLoss(true)}
-                  className="px-2.5 py-1.5 rounded-xl bg-red-500/10 border border-red-500/30 text-red-400 hover:bg-red-500/20 text-[11px] font-semibold flex items-center justify-center gap-1.5 cursor-pointer"
-                >
-                  <AlertTriangle className="w-3 h-3" />
-                  <span>Siren (StopLoss)</span>
-                </button>
-
-                <button
-                  onClick={() => audioEngine.playTargetHit(true)}
-                  className="px-2.5 py-1.5 rounded-xl bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 hover:bg-emerald-500/20 text-[11px] font-semibold flex items-center justify-center gap-1.5 cursor-pointer"
-                >
-                  <Target className="w-3 h-3" />
-                  <span>Target Beep</span>
-                </button>
-
-                <button
-                  onClick={() => audioEngine.playCrossDown(true)}
-                  className="px-2.5 py-1.5 rounded-xl bg-amber-500/10 border border-amber-500/30 text-amber-300 hover:bg-amber-500/20 text-[11px] font-semibold flex items-center justify-center gap-1.5 cursor-pointer"
-                >
-                  <TrendingDown className="w-3 h-3" />
-                  <span>Below Entry Beep</span>
-                </button>
-
-                <button
-                  onClick={() => audioEngine.playCrossUp(true)}
-                  className="px-2.5 py-1.5 rounded-xl bg-sky-500/10 border border-sky-500/30 text-sky-300 hover:bg-sky-500/20 text-[11px] font-semibold flex items-center justify-center gap-1.5 cursor-pointer"
-                >
-                  <TrendingUp className="w-3 h-3" />
-                  <span>Above Entry Beep</span>
-                </button>
+          {/* Voice Synthesizer Toggle */}
+          <div className="flex items-center justify-between p-3 rounded-2xl bg-slate-950/60 border border-slate-800">
+            <div className="flex items-center gap-2.5">
+              <div className="p-1.5 rounded-lg bg-purple-500/20 text-purple-400">
+                <Mic className="w-4 h-4" />
+              </div>
+              <div>
+                <span className="font-semibold text-xs text-white block">Voice Callouts (Speech API)</span>
+                <span className="text-[10px] text-slate-400">Spoken Target & Risk Announcements</span>
               </div>
             </div>
-          )}
+            <button
+              type="button"
+              onClick={() => onChangeConfig({ ...config, voiceAlertsEnabled: !(config.voiceAlertsEnabled ?? true) })}
+              className={`p-2 rounded-xl text-xs font-bold transition-all cursor-pointer ${
+                (config.voiceAlertsEnabled ?? true)
+                  ? 'bg-purple-500/20 border border-purple-500/50 text-purple-400'
+                  : 'bg-slate-900 border border-slate-800 text-slate-500'
+              }`}
+            >
+              {(config.voiceAlertsEnabled ?? true) ? 'ON' : 'OFF'}
+            </button>
+          </div>
+
+          {/* Mobile Haptics Toggle */}
+          <div className="flex items-center justify-between p-3 rounded-2xl bg-slate-950/60 border border-slate-800">
+            <div className="flex items-center gap-2.5">
+              <div className="p-1.5 rounded-lg bg-amber-500/20 text-amber-400">
+                <Smartphone className="w-4 h-4" />
+              </div>
+              <div>
+                <span className="font-semibold text-xs text-white block">Mobile Haptic Vibration</span>
+                <span className="text-[10px] text-slate-400">Tactile Pulses for Peripheral Phones</span>
+              </div>
+            </div>
+            <button
+              type="button"
+              onClick={() => onChangeConfig({ ...config, hapticsEnabled: !(config.hapticsEnabled ?? true) })}
+              className={`p-2 rounded-xl text-xs font-bold transition-all cursor-pointer ${
+                (config.hapticsEnabled ?? true)
+                  ? 'bg-amber-500/20 border border-amber-500/50 text-amber-400'
+                  : 'bg-slate-900 border border-slate-800 text-slate-500'
+              }`}
+            >
+              {(config.hapticsEnabled ?? true) ? 'ON' : 'OFF'}
+            </button>
+          </div>
+
+          {/* Sound & Voice Preview Test Buttons */}
+          <div className="pt-1">
+            <label className="text-[10px] font-semibold text-slate-400 uppercase tracking-wider block mb-1.5">
+              Acoustic & Voice Previews
+            </label>
+            <div className="grid grid-cols-2 gap-1.5">
+              <button
+                type="button"
+                onClick={() => audioEngine.playStopLoss(true)}
+                className="px-2.5 py-1.5 rounded-xl bg-red-500/10 border border-red-500/30 text-red-400 hover:bg-red-500/20 text-[11px] font-semibold flex items-center justify-center gap-1.5 cursor-pointer"
+              >
+                <AlertTriangle className="w-3 h-3" />
+                <span>Siren (StopLoss)</span>
+              </button>
+
+              <button
+                type="button"
+                onClick={() => audioEngine.playTargetHit(true)}
+                className="px-2.5 py-1.5 rounded-xl bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 hover:bg-emerald-500/20 text-[11px] font-semibold flex items-center justify-center gap-1.5 cursor-pointer"
+              >
+                <Target className="w-3 h-3" />
+                <span>Target Beep</span>
+              </button>
+
+              <button
+                type="button"
+                onClick={() => audioEngine.playBreakevenLock(true)}
+                className="px-2.5 py-1.5 rounded-xl bg-amber-500/10 border border-amber-500/30 text-amber-300 hover:bg-amber-500/20 text-[11px] font-semibold flex items-center justify-center gap-1.5 cursor-pointer"
+              >
+                <ShieldCheck className="w-3 h-3" />
+                <span>Breakeven Chime</span>
+              </button>
+
+              <button
+                type="button"
+                onClick={() => audioEngine.speak('Target reached on Reliance at 1497 Rupees', 0)}
+                className="px-2.5 py-1.5 rounded-xl bg-purple-500/10 border border-purple-500/30 text-purple-300 hover:bg-purple-500/20 text-[11px] font-semibold flex items-center justify-center gap-1.5 cursor-pointer"
+              >
+                <Mic className="w-3 h-3" />
+                <span>Test Voice</span>
+              </button>
+            </div>
+          </div>
         </div>
 
         {/* Section 3: Edge Glow Intensity */}

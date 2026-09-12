@@ -53,6 +53,8 @@ export interface ChartOverlayConfig {
   showEMA: boolean;
   emaPeriod: number;
   audioEnabled: boolean;
+  voiceAlertsEnabled?: boolean;
+  hapticsEnabled?: boolean;
 }
 
 export interface IndianStockPreset {

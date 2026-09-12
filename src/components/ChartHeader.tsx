@@ -1,6 +1,6 @@
 import React from 'react';
-import type { TradeSetup, EdgeState, ChartOverlayConfig } from '../types';
-import { RefreshCcw, Zap, SlidersHorizontal, Radio, CandlestickChart, LineChart, Maximize, Minimize, Volume2, VolumeX } from 'lucide-react';
+import type { TradeSetup, EdgeState, ChartOverlayConfig, Timeframe } from '../types';
+import { RefreshCcw, Zap, SlidersHorizontal, Radio, CandlestickChart, LineChart, Maximize, Minimize, Volume2, VolumeX, Shield, ShieldCheck } from 'lucide-react';
 
 interface ChartHeaderProps {
   setup: TradeSetup;
@@ -17,6 +17,8 @@ interface ChartHeaderProps {
   onToggleSettings: () => void;
   onToggleDevMenu: () => void;
   onExitSession: () => void;
+  onChangeTimeframe?: (tf: Timeframe) => void;
+  onMoveSLToCost?: () => void;
 }
 
 export const ChartHeader: React.FC<ChartHeaderProps> = ({
@@ -34,15 +36,18 @@ export const ChartHeader: React.FC<ChartHeaderProps> = ({
   onToggleSettings,
   onToggleDevMenu,
   onExitSession,
+  onChangeTimeframe,
+  onMoveSLToCost,
 }) => {
   const priceDiff = currentPrice - setup.buyPrice;
   const positionPct = setup.buyPrice > 0 ? (priceDiff / setup.buyPrice) * 100 : 0;
   const totalPnL = setup.quantity ? priceDiff * setup.quantity : null;
+  const isSlAtCost = !!setup.stopLoss && Math.abs(setup.stopLoss - setup.buyPrice) < 0.01;
 
   return (
-    <header className="w-full h-14 bg-slate-950/80 backdrop-blur-md border-b border-slate-800/80 px-3 sm:px-6 flex items-center justify-between z-30 select-none">
-      {/* Left: Ticker & Live Feed Indicator */}
-      <div className="flex items-center gap-2 sm:gap-3">
+    <header className="w-full h-14 bg-slate-950/80 backdrop-blur-md border-b border-slate-800/80 px-2 sm:px-6 flex items-center justify-between z-30 select-none">
+      {/* Left: Ticker, Interactive Timeframe & Live Feed Indicator */}
+      <div className="flex items-center gap-1.5 sm:gap-3">
         <button
           onClick={onExitSession}
           className="p-1.5 rounded-lg hover:bg-slate-800 text-slate-400 hover:text-white transition-colors cursor-pointer"
@@ -52,18 +57,35 @@ export const ChartHeader: React.FC<ChartHeaderProps> = ({
         </button>
 
         {/* SENKO Enso Mark */}
-        <div className="flex items-center gap-2 pr-2 border-r border-slate-800">
+        <div className="hidden sm:flex items-center gap-2 pr-2 border-r border-slate-800">
           <img src="/senko_enso_mark.jpg" alt="SENKO" className="w-6 h-6 rounded-md object-cover border border-amber-500/30" />
           <span className="font-serif font-bold text-xs tracking-widest text-amber-300 hidden md:inline">SENKO</span>
         </div>
 
-        <div className="flex items-center gap-2">
-          <span className="font-bold text-base sm:text-lg tracking-wider text-white">
+        <div className="flex items-center gap-1.5 sm:gap-2">
+          <span className="font-bold text-sm sm:text-lg tracking-wider text-white">
             {setup.symbol}
           </span>
-          <span className="text-[10px] font-mono font-semibold px-2 py-0.5 rounded bg-slate-800 text-slate-300">
-            {setup.timeframe}
-          </span>
+
+          {/* Interactive In-Cockpit Timeframe Switcher */}
+          <div className="flex items-center p-0.5 bg-slate-900/90 border border-slate-800 rounded-lg">
+            {(['1m', '3m', '5m', '15m'] as Timeframe[]).map((tf) => (
+              <button
+                key={tf}
+                type="button"
+                onClick={() => onChangeTimeframe?.(tf)}
+                className={`px-1.5 py-0.5 text-[10px] font-mono font-semibold rounded transition-all cursor-pointer ${
+                  setup.timeframe === tf
+                    ? 'bg-amber-500/20 text-amber-300 border border-amber-500/40 shadow-xs'
+                    : 'text-slate-400 hover:text-slate-200'
+                }`}
+                title={`Switch candle timeframe to ${tf}`}
+              >
+                {tf}
+              </button>
+            ))}
+          </div>
+
           <div
             className={`flex items-center gap-1 text-[10px] font-mono px-2 py-0.5 rounded-full border ${
               isLiveFeed
@@ -78,21 +100,46 @@ export const ChartHeader: React.FC<ChartHeaderProps> = ({
         </div>
       </div>
 
-      {/* Middle: Current Price, Change, & Total P&L */}
-      <div className="flex items-center gap-3 sm:gap-6 font-mono-numbers">
+      {/* Middle: Current Price, Change, Breakeven & Total P&L */}
+      <div className="flex items-center gap-2 sm:gap-4 font-mono-numbers">
         {/* Current Price & Change */}
         <div className="flex flex-col sm:flex-row sm:items-baseline gap-0.5 sm:gap-2 text-right sm:text-left">
-          <span className="text-base sm:text-xl font-bold text-white">
+          <span className="text-sm sm:text-xl font-bold text-white">
             ₹{currentPrice.toFixed(2)}
           </span>
           <span
-            className={`text-xs font-semibold ${
+            className={`text-[11px] sm:text-xs font-semibold ${
               priceChange >= 0 ? 'text-emerald-400' : 'text-red-400'
             }`}
           >
             {priceChange >= 0 ? '+' : ''}{priceChange.toFixed(2)} ({priceChangePct >= 0 ? '+' : ''}{priceChangePct.toFixed(2)}%)
           </span>
         </div>
+
+        {/* Dynamic Move SL to Cost (Breakeven) / Protected Badge */}
+        {setup.buyPrice > 0 && (
+          <div className="hidden md:flex items-center">
+            {isSlAtCost ? (
+              <div
+                className="flex items-center gap-1.5 px-2.5 py-1 rounded-xl bg-emerald-500/15 border border-emerald-500/40 text-emerald-300 text-xs font-mono font-bold shadow-sm"
+                title="Stop-Loss is locked at Buy Price (Risk = ₹0.00)"
+              >
+                <ShieldCheck className="w-3.5 h-3.5 text-emerald-400" />
+                <span>SL AT COST</span>
+              </div>
+            ) : currentPrice > setup.buyPrice && onMoveSLToCost ? (
+              <button
+                type="button"
+                onClick={onMoveSLToCost}
+                className="flex items-center gap-1.5 px-2.5 py-1 rounded-xl bg-amber-500/15 border border-amber-500/40 hover:bg-amber-500/25 text-amber-300 text-xs font-mono font-bold transition-all animate-pulse hover:animate-none cursor-pointer shadow-md shadow-amber-500/10"
+                title={`Lock in ₹0 risk by moving Stop Loss to Entry Price (₹${setup.buyPrice.toFixed(2)})`}
+              >
+                <Shield className="w-3.5 h-3.5" />
+                <span>MOVE SL TO COST</span>
+              </button>
+            ) : null}
+          </div>
+        )}
 
         {/* Total P&L (if quantity supplied) */}
         {setup.quantity && totalPnL !== null && (

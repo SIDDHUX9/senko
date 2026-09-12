@@ -1,5 +1,5 @@
 import { useState, useCallback, useEffect } from 'react';
-import type { TradeSetup, ChartOverlayConfig } from './types';
+import type { TradeSetup, ChartOverlayConfig, Timeframe } from './types';
 import { SetupForm } from './components/SetupForm';
 import { ChartHeader } from './components/ChartHeader';
 import { TradingView } from './components/TradingView';
@@ -8,30 +8,66 @@ import { DevMenu } from './components/DevMenu';
 import { SettingsModal } from './components/SettingsModal';
 import { useRealtimePriceFeed } from './hooks/useRealtimePriceFeed';
 import { useEdgeState } from './hooks/useEdgeState';
+import { audioEngine } from './utils/audioEngine';
+
+const DEFAULT_SETUP: TradeSetup = {
+  symbol: 'RELIANCE',
+  buyPrice: 1475.00,
+  quantity: 50,
+  targetPrice: 1497.00,
+  stopLoss: 1460.00,
+  timeframe: '5m',
+};
+
+const DEFAULT_OVERLAY_CONFIG: ChartOverlayConfig = {
+  chartType: 'candlestick',
+  glowLevel: 'standard',
+  showVWAP: true,
+  showEMA: true,
+  emaPeriod: 20,
+  audioEnabled: true,
+  voiceAlertsEnabled: true,
+  hapticsEnabled: true,
+};
 
 export function App() {
   const [mode, setMode] = useState<'setup' | 'trading'>('setup');
-  const [setup, setSetup] = useState<TradeSetup>({
-    symbol: 'RELIANCE',
-    buyPrice: 1475.00,
-    quantity: 50,
-    targetPrice: 1497.00,
-    stopLoss: 1460.00,
-    timeframe: '5m',
+  const [setup, setSetup] = useState<TradeSetup>(() => {
+    if (typeof window !== 'undefined') {
+      try {
+        const saved = localStorage.getItem('senko_trade_setup');
+        if (saved) return { ...DEFAULT_SETUP, ...JSON.parse(saved) };
+      } catch {}
+    }
+    return DEFAULT_SETUP;
   });
 
-  const [overlayConfig, setOverlayConfig] = useState<ChartOverlayConfig>({
-    chartType: 'candlestick',
-    glowLevel: 'standard',
-    showVWAP: true,
-    showEMA: true,
-    emaPeriod: 20,
-    audioEnabled: true,
+  const [overlayConfig, setOverlayConfig] = useState<ChartOverlayConfig>(() => {
+    if (typeof window !== 'undefined') {
+      try {
+        const saved = localStorage.getItem('senko_cockpit_config');
+        if (saved) return { ...DEFAULT_OVERLAY_CONFIG, ...JSON.parse(saved) };
+      } catch {}
+    }
+    return DEFAULT_OVERLAY_CONFIG;
   });
 
   const [isFullscreen, setIsFullscreen] = useState<boolean>(false);
   const [isDevMenuOpen, setIsDevMenuOpen] = useState<boolean>(false);
   const [isSettingsOpen, setIsSettingsOpen] = useState<boolean>(false);
+
+  // Sync state changes to localStorage
+  useEffect(() => {
+    try {
+      localStorage.setItem('senko_trade_setup', JSON.stringify(setup));
+    } catch {}
+  }, [setup]);
+
+  useEffect(() => {
+    try {
+      localStorage.setItem('senko_cockpit_config', JSON.stringify(overlayConfig));
+    } catch {}
+  }, [overlayConfig]);
 
   // Real-time market feed hook
   const {
@@ -49,13 +85,16 @@ export function App() {
     refetchFeed,
   } = useRealtimePriceFeed(setup);
 
-  // Edge state hook with level targets & audio alerts
+  // Edge state hook with level targets, voice alerts & haptics
   const edgeState = useEdgeState(
     currentPrice,
     setup.buyPrice,
     setup.targetPrice,
     setup.stopLoss,
-    overlayConfig.audioEnabled
+    overlayConfig.audioEnabled,
+    overlayConfig.voiceAlertsEnabled ?? true,
+    overlayConfig.hapticsEnabled ?? true,
+    setup.symbol
   );
 
   // Listen to native browser fullscreen change events
@@ -105,6 +144,16 @@ export function App() {
     }));
   };
 
+  const handleChangeTimeframe = (tf: Timeframe) => {
+    setSetup((prev) => ({ ...prev, timeframe: tf }));
+  };
+
+  const handleMoveSLToCost = () => {
+    if (setup.buyPrice <= 0) return;
+    setSetup((prev) => ({ ...prev, stopLoss: prev.buyPrice }));
+    audioEngine.playBreakevenLock();
+  };
+
   // Secret Triple Tap Gesture Detection for Dev Menu
   const tapCountRef = useState<{ count: number; lastTime: number }>({ count: 0, lastTime: 0 })[0];
   const handleCornerTap = useCallback(() => {
@@ -147,6 +196,8 @@ export function App() {
         onToggleSettings={() => setIsSettingsOpen(true)}
         onToggleDevMenu={() => setIsDevMenuOpen(true)}
         onExitSession={handleExitSession}
+        onChangeTimeframe={handleChangeTimeframe}
+        onMoveSLToCost={handleMoveSLToCost}
       />
 
       {/* Full Viewport Candlestick / Line Chart */}

@@ -6,6 +6,8 @@
 class AudioEngine {
   private ctx: AudioContext | null = null;
   private isMuted: boolean = false;
+  private isVoiceEnabled: boolean = true;
+  private isHapticsEnabled: boolean = true;
   private lastTriggerTimes: Record<string, number> = {};
 
   constructor() {
@@ -45,6 +47,59 @@ class AudioEngine {
     return this.isMuted;
   }
 
+  public setVoiceEnabled(enabled: boolean) {
+    this.isVoiceEnabled = enabled;
+  }
+
+  public getIsVoiceEnabled(): boolean {
+    return this.isVoiceEnabled;
+  }
+
+  public setHapticsEnabled(enabled: boolean) {
+    this.isHapticsEnabled = enabled;
+  }
+
+  public getIsHapticsEnabled(): boolean {
+    return this.isHapticsEnabled;
+  }
+
+  /**
+   * Natural voice speech callout via native Web Speech API.
+   */
+  public speak(text: string, cooldownMs: number = 3000) {
+    if (typeof window === 'undefined' || !window.speechSynthesis) return;
+    if (this.isMuted || !this.isVoiceEnabled) return;
+
+    const now = Date.now();
+    const last = this.lastTriggerTimes[`speech_${text}`] || 0;
+    if (now - last < cooldownMs) return;
+    this.lastTriggerTimes[`speech_${text}`] = now;
+
+    try {
+      window.speechSynthesis.cancel(); // cancel any stale utterance
+      const utterance = new SpeechSynthesisUtterance(text);
+      utterance.rate = 1.05;
+      utterance.pitch = 1.0;
+      utterance.volume = 0.9;
+      window.speechSynthesis.speak(utterance);
+    } catch {
+      // Speech synthesis unsupported or blocked
+    }
+  }
+
+  /**
+   * Physical tactile vibration for mobile & tablet peripheral cockpits.
+   */
+  public vibrate(pattern: number | number[] = [150, 80, 150]) {
+    if (typeof window === 'undefined' || !navigator.vibrate) return;
+    if (!this.isHapticsEnabled) return;
+    try {
+      navigator.vibrate(pattern);
+    } catch {
+      // Vibration not supported
+    }
+  }
+
   private canPlay(soundId: string, cooldownMs: number = 2500): boolean {
     if (this.isMuted) return false;
     const now = Date.now();
@@ -61,6 +116,7 @@ class AudioEngine {
   public playStopLoss(ignoreCooldown: boolean = false) {
     if (!ignoreCooldown && !this.canPlay('stoploss', 3500)) return;
     this.initCtx();
+    this.vibrate([300, 100, 300]);
     if (!this.ctx) return;
 
     const now = this.ctx.currentTime;
@@ -103,6 +159,7 @@ class AudioEngine {
   public playTargetHit(ignoreCooldown: boolean = false) {
     if (!ignoreCooldown && !this.canPlay('target', 4000)) return;
     this.initCtx();
+    this.vibrate([150, 80, 150]);
     if (!this.ctx) return;
 
     const now = this.ctx.currentTime;
@@ -222,6 +279,38 @@ class AudioEngine {
 
     osc.start(now);
     osc.stop(now + 0.15);
+  }
+
+  /**
+   * 🛡️ BREAKEVEN LOCK: Harmonious 3-Note Chime (523Hz -> 659Hz -> 784Hz - C5, E5, G5)
+   */
+  public playBreakevenLock(ignoreCooldown: boolean = false) {
+    if (!ignoreCooldown && !this.canPlay('breakeven', 2000)) return;
+    this.initCtx();
+    this.vibrate([120, 60, 120]);
+    this.speak('Stop loss moved to cost', 2000);
+
+    if (!this.ctx) return;
+    const now = this.ctx.currentTime;
+    const chord = [523.25, 659.25, 783.99];
+
+    chord.forEach((freq, idx) => {
+      if (!this.ctx) return;
+      const osc = this.ctx.createOscillator();
+      const gain = this.ctx.createGain();
+
+      osc.type = 'sine';
+      osc.frequency.setValueAtTime(freq, now + idx * 0.08);
+
+      gain.gain.setValueAtTime(0.35, now + idx * 0.08);
+      gain.gain.exponentialRampToValueAtTime(0.01, now + idx * 0.08 + 0.25);
+
+      osc.connect(gain);
+      gain.connect(this.ctx.destination);
+
+      osc.start(now + idx * 0.08);
+      osc.stop(now + idx * 0.08 + 0.26);
+    });
   }
 }
 

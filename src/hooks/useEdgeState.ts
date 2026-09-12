@@ -7,7 +7,10 @@ export function useEdgeState(
   buyPrice: number,
   targetPrice?: number,
   stopLoss?: number,
-  audioEnabled: boolean = true
+  audioEnabled: boolean = true,
+  voiceEnabled: boolean = true,
+  hapticsEnabled: boolean = true,
+  symbol?: string
 ): EdgeState {
   const [edgeState, setEdgeState] = useState<EdgeState>({
     baseColor: 'neutral',
@@ -56,14 +59,22 @@ export function useEdgeState(
     const isTargetHit = !!(targetPrice && targetPrice > 0 && currentPrice >= targetPrice);
     const isStopLossHit = !!(stopLoss && stopLoss > 0 && currentPrice <= stopLoss);
 
-    // --- Audio Sound Alerts Triggering ---
+    // --- Audio Sound & Voice Alerts Triggering ---
     audioEngine.setMuted(!audioEnabled);
+    audioEngine.setVoiceEnabled(voiceEnabled);
+    audioEngine.setHapticsEnabled(hapticsEnabled);
 
     if (audioEnabled) {
       if (isTargetHit && (prevPrice < targetPrice!)) {
         audioEngine.playTargetHit();
+        if (voiceEnabled) {
+          audioEngine.speak(`Target reached ${symbol ? 'on ' + symbol : ''} at ${currentPrice.toFixed(2)}`);
+        }
       } else if (isStopLossHit && (prevPrice > stopLoss!)) {
         audioEngine.playStopLoss();
+        if (voiceEnabled) {
+          audioEngine.speak(`Warning: Stop loss breached ${symbol ? 'on ' + symbol : ''} at ${currentPrice.toFixed(2)}`);
+        }
       } else if (prevPrice < buyPrice && currentPrice >= buyPrice) {
         audioEngine.playCrossUp();
       } else if (prevPrice > buyPrice && currentPrice < buyPrice) {
@@ -97,6 +108,10 @@ export function useEdgeState(
     if (detectedPulse !== 'none') {
       activePulseRef.current = detectedPulse;
 
+      if (audioEnabled && detectedPulse === 'flash') {
+        audioEngine.playSpike();
+      }
+
       if (pulseTimerRef.current) {
         clearTimeout(pulseTimerRef.current);
       }
@@ -118,7 +133,7 @@ export function useEdgeState(
     });
 
     prevPriceRef.current = currentPrice;
-  }, [currentPrice, buyPrice, targetPrice, stopLoss, audioEnabled]);
+  }, [currentPrice, buyPrice, targetPrice, stopLoss, audioEnabled, voiceEnabled, hapticsEnabled, symbol]);
 
   useEffect(() => {
     return () => {

@@ -36,16 +36,20 @@ Whether monitoring active positions on Indian equity markets (NSE/BSE) or testin
 * **Technical Indicators**:
   * 📈 **VWAP (Volume-Weighted Average Price)**: Real-time intraday calculation.
   * 📉 **EMA (Exponential Moving Average)**: Dynamic period calculation (default 20-period, fully adjustable).
+* **In-Cockpit Quick Controls**: Real-time timeframe switcher (`1m`, `3m`, `5m`, `15m`) and one-click **"MOVE SL TO COST"** breakeven action without session interruptions.
 * **Responsive Scaling & Precision Tooltips**: Formatted for Indian Rupee (₹) price precision and unix timestamps.
 
-### 🔊 3. Zero-Latency Spatial Audio Engine (`audioEngine.ts`)
-* Built on the native **Web Audio API** — zero external `.mp3` assets required, completely hardware-synthesized with zero network audio latency.
+### 🔊 3. Zero-Latency Sensory Engine (`audioEngine.ts`)
+* Built on the native **Web Audio API** & **Web Speech API** — zero external audio assets required, completely hardware-synthesized with zero network audio latency.
 * Distinct audio signatures:
   * 🚨 **Stop-Loss Breach**: Dual-tone emergency siren.
   * 🎯 **Target Hit**: Dual-stage victory chime.
+  * 🛡️ **Breakeven Lock**: Harmonious C-major chord chime when Stop-Loss is moved to cost.
   * 🚀 **Cross-Up**: High double-tone chirp.
   * 📉 **Cross-Down**: Descending caution tone.
   * ⚡ **Momentum Spike**: High-frequency exponential sweep.
+* **Natural Voice Callouts**: Spoken trade announcements (*"Target hit on RELIANCE at 1497"*, *"Warning: Stop-loss breached"*) using native browser speech synthesis.
+* **Mobile Haptic Feedback**: Vibration pulse patterns via `navigator.vibrate` for dedicated smartphone peripheral trading monitors.
 
 ### 📡 4. Real-Time Market Data & Synthetic Fallback (`marketDataApi.ts`)
 * **Live Market Integration**: Parallel fetch engine connecting to TradingView Scanner API & Yahoo Finance endpoints for live NSE stock quotes and intraday candles.
