@@ -1,4 +1,6 @@
 # ⚡ Senko — Intraday Trading Terminal & Ambient Edge Cockpit
+![Uploading image.png…]()
+
 
 > **A high-performance, distraction-free intraday trading cockpit powered by React 19, Lightweight Charts, real-time market feeds, spatial audio feedback, and dynamic peripheral edge glow.**
 
